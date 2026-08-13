@@ -6,29 +6,29 @@ using System.Threading.Tasks;
 
 namespace my_jlox
 {
-    public class AstPrinter : Visitor<string>
+    public class AstPrinter : Operate<string>
     {
         public string print(Expr expr)
         {
-            return expr.accept<string>(this);
+            return expr.pickForOp<string>(this); // this = expr type. pick THIS expr type op
         }
 
-        public string visitBinary(Binary expr)
+        public string opBinary(Binary expr) // Binary calls this on selection
         {
             return parenthesize(expr.oprtr.lexeme, expr.left, expr.right);
         }
 
-        public string visitUnary(Unary expr)
+        public string opUnary(Unary expr) // Same for unary
         {
             return parenthesize(expr.oprtr.lexeme, expr.right);
         }
 
-        public string visitGrouping(Grouping expr)
+        public string opGrouping(Grouping expr) // Grouping
         {
             return parenthesize("group", expr.expression);
         }
 
-        public string visitLiteral(Literal expr)
+        public string opLiteral(Literal expr) // Literal, and so on
         {
             return expr.value.ToString() ?? "nil";
         }
@@ -41,7 +41,7 @@ namespace my_jlox
             foreach (Expr e in exprs)
             {
                 builder.Append(" ");
-                builder.Append(e.accept(this));
+                builder.Append(e.pickForOp(this));
             }
             builder.Append(")");
 

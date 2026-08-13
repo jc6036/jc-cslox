@@ -10,17 +10,17 @@ namespace my_jlox
     // We tie each operation our expressions must be processed through, to a new class, that implements each visitor
     // That way we can add new expression types by adding a new visitor and expr class
     // And we can add new operations on expressions by adding a new operation class and implementing visitor
-    public interface Visitor<T>
+    public interface Operate<T>
     {
-        public T visitBinary(Binary binary);
-        public T visitGrouping(Grouping grouping);
-        public T visitUnary(Unary unary);
-        public T visitLiteral(Literal litearl);
+        public T opBinary(Binary binary);
+        public T opGrouping(Grouping grouping);
+        public T opUnary(Unary unary);
+        public T opLiteral(Literal litearl);
     }
 
     public abstract class Expr
     {
-        public abstract T accept<T>(Visitor<T> visitor); // Main operation execution point
+        public abstract T pickForOp<T>(Operate<T> opPicker); // Main operation execution point
                                                             // oop trick automatically routes via extension type and visitor type to the correct operation code
     }
 
@@ -37,9 +37,9 @@ namespace my_jlox
             this.right = right;
         }
 
-        public override T accept<T>(Visitor<T> visitor)
+        public override T pickForOp<T>(Operate<T> opPicker)
         {
-            return visitor.visitBinary(this);
+            return opPicker.opBinary(this);
         }
     }
 
@@ -52,9 +52,9 @@ namespace my_jlox
             this.expression = expression;
         }
 
-        public override T accept<T>(Visitor<T> visitor)
+        public override T pickForOp<T>(Operate<T> opPicker)
         {
-            return visitor.visitGrouping(this);
+            return opPicker.opGrouping(this);
         }
     }
 
@@ -67,9 +67,9 @@ namespace my_jlox
             this.value = value;
         }
 
-        public override T accept<T>(Visitor<T> visitor)
+        public override T pickForOp<T>(Operate<T> opPicker)
         {
-            return visitor.visitLiteral(this);
+            return opPicker.opLiteral(this);
         }
     }
 
@@ -84,9 +84,9 @@ namespace my_jlox
             this.right = right;
         }
 
-        public override T accept<T>(Visitor<T> visitor)
+        public override T pickForOp<T>(Operate<T> opPicker)
         {
-            return visitor.visitUnary(this);
+            return opPicker.opUnary(this);
         }
     }
 }
