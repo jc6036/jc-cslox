@@ -1,6 +1,6 @@
 ﻿namespace my_jlox
 {
-    enum TokenType
+    public enum TokenType
     {
         // Single-character tokens
         LEFT_PAREN = 0, 
