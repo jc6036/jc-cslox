@@ -32,11 +32,12 @@ namespace my_jlox
             Scanner scanner = new(source);
             List<Token> tokens = scanner.ScanTokens();
 
-            // For now, just print the tokens.
-            foreach (Token token in tokens)
-            {
-                Console.WriteLine(token);
-            }
+            Parser parser = new Parser(tokens);
+            Expr? expression = parser.parse();
+
+            if (hadError || expression == null) return;
+
+            Console.WriteLine(new AstPrinter().print(expression));
         }
 
         // Wrapper for Run
@@ -54,7 +55,7 @@ namespace my_jlox
         {
             while (true)
             {
-                Console.Write("> ");
+                Console.Write("jc-cslox> ");
                 string? line = Console.ReadLine();
 
                 if (string.IsNullOrEmpty(line))

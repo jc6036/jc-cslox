@@ -15,6 +15,18 @@ namespace my_jlox
             this.tokens = tokens;
         }
 
+        public Expr? parse()
+        {
+            try
+            {
+                return expression();
+            }
+            catch(ParseException)
+            {
+                return null;
+            }
+        }
+
         private Expr expression()
         {
             return equality();
@@ -106,7 +118,7 @@ namespace my_jlox
                 return new Grouping(expr);
             }
 
-            return new Literal("\0"); // We should never get here, this just shuts the compiler up
+            throw error(peek(), "Expected expression.");
         }
 
         // Errors
@@ -121,6 +133,31 @@ namespace my_jlox
         {
             Lox.Error(token, message);
             return new ParseException();
+        }
+
+        private void synchronize()
+        {
+            advance();
+
+            while(!isAtEnd())
+            {
+                if (previous().type == TokenType.SEMICOLON) return;
+
+                switch(peek().type)
+                {
+                    case TokenType.CLASS: return;
+                    case TokenType.FUN: return;
+                    case TokenType.VAR: return;
+                    case TokenType.FOR: return;
+                    case TokenType.IF: return;
+                    case TokenType.WHILE: return;
+                    case TokenType.PRINT: return;
+                    case TokenType.RETURN: return;
+                    default: break;
+                }
+
+                advance();
+            }
         }
 
         // Helpers
