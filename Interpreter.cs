@@ -26,6 +26,7 @@ namespace my_jlox
             switch(expr.oprtr.type)
             {
                 case TokenType.MINUS:
+                    checkNumberOperand(expr.oprtr, right);
                     return -(float)right;
                 case TokenType.BANG:
                     return !isTruthy(right);
@@ -42,12 +43,16 @@ namespace my_jlox
             switch(expr.oprtr.type)
             {
                 case TokenType.GREATER:
+                    checkNumberOperands(expr.oprtr, left, right);
                     return (float)left > (float)right;
                 case TokenType.GREATER_EQUAL:
+                    checkNumberOperands(expr.oprtr, left, right);
                     return (float)left >= (float)right;
                 case TokenType.LESS:
+                    checkNumberOperands(expr.oprtr, left, right);
                     return (float)left < (float)right;
                 case TokenType.LESS_EQUAL:
+                    checkNumberOperands(expr.oprtr, left, right);
                     return (float)left <= (float)right;
 
                 case TokenType.BANG_EQUAL:
@@ -56,10 +61,13 @@ namespace my_jlox
                     return isEqual(left, right);
 
                 case TokenType.MINUS:
+                    checkNumberOperands(expr.oprtr, left, right);
                     return (float)left - (float)right;
                 case TokenType.SLASH:
+                    checkNumberOperands(expr.oprtr, left, right);
                     return (float)left / (float)right;
                 case TokenType.STAR:
+                    checkNumberOperands(expr.oprtr, left, right);
                     return (float)left * (float)right;
                 case TokenType.PLUS:
                     if(left.GetType() == typeof(float) && right.GetType() == typeof(float))
@@ -68,7 +76,7 @@ namespace my_jlox
                     if (left.GetType() == typeof(string) && right.GetType() == typeof(string))
                         return (string)left + (string)right;
 
-                    break;
+                    throw new RuntimeError(expr.oprtr, "Operands must be two numbers or two strings.");
             }
 
             return null;
@@ -93,6 +101,20 @@ namespace my_jlox
             if (a == null) return false;
 
             return a.Equals(b); // Primarily really leaning on C#'s equality checker here
+        }
+
+        private void checkNumberOperand(Token oprtr, object operand)
+        {
+            if (operand.GetType() == typeof(float)) return;
+            // otherwise
+            throw new RuntimeError(oprtr, "Operand must be a number.");
+        }
+
+        private void checkNumberOperands(Token oprtr, object left, object right)
+        {
+            if (left.GetType() == typeof(float) && right.GetType() == typeof(float)) return;
+            // otherwise
+            throw new RuntimeError(oprtr, "Operands must be numbers.");
         }
     }
 }
