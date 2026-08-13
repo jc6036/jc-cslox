@@ -15,18 +15,40 @@ namespace my_jlox
             this.tokens = tokens;
         }
 
-        public Expr? parse()
+        public List<Stmt> parse()
         {
-            try
+            List<Stmt> statements = new List<Stmt>();
+            while(! isAtEnd())
             {
-                return expression();
+                statements.Add(statement());
             }
-            catch(ParseException)
-            {
-                return null;
-            }
+
+            return statements;
         }
 
+        private Stmt statement()
+        {
+            if (match(TokenType.PRINT)) return printStatement();
+
+            return expressionStatement();
+        }
+
+        private Stmt printStatement()
+        {
+            Expr value = expression();
+            consume(TokenType.SEMICOLON, "Expect ';' after value.");
+            return new Print(value);
+        }
+
+        private Stmt expressionStatement()
+        {
+            Expr expr = expression();
+
+            consume(TokenType.SEMICOLON, "Expet ';' after expression.");
+            return new ExpressionStmt(expr);
+        }
+
+        #region recursive descent expression parsing
         private Expr expression()
         {
             return equality();
@@ -120,6 +142,7 @@ namespace my_jlox
 
             throw error(peek(), "Expected expression.");
         }
+        #endregion
 
         // Errors
         private Token consume(TokenType type, string message)

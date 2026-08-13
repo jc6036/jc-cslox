@@ -21,7 +21,7 @@ namespace my_jlox
     public abstract class Expr
     {
         public abstract T pickForOp<T>(Operate<T> opPicker); // Main operation execution point
-                                                            // oop trick automatically routes via extension type and visitor type to the correct operation code
+                                                             // oop trick automatically routes via extension type and visitor type to the correct operation code
     }
 
     public class Binary : Expr

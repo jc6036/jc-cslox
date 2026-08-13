@@ -35,11 +35,11 @@ namespace my_jlox
             List<Token> tokens = scanner.ScanTokens();
 
             Parser parser = new Parser(tokens);
-            Expr? expression = parser.parse();
+            List<Stmt> statements = parser.parse();
 
-            if (hadError || expression == null) return;
+            if (hadError || statements == null) return;
 
-            interpreter.interpret(expression);
+            interpreter.interpret(statements);
         }
 
         // Wrapper for Run

@@ -1,15 +1,18 @@
 ﻿using System.Reflection.Metadata;
+using System.Runtime.CompilerServices;
 
 namespace my_jlox
 {
-    public class Interpreter : Operate<object>
+    public class Interpreter : Operate<object>, Execute<object?>
     {
-        public void interpret(Expr expr)
+        public void interpret(List<Stmt> statements)
         {
             try
             {
-                object value = evaluate(expr);
-                Console.WriteLine(stringify(value));
+                foreach(Stmt statement in statements)
+                {
+                    execute(statement);
+                }
             }
             catch (RuntimeError ex)
             {
@@ -17,6 +20,20 @@ namespace my_jlox
             }
         }
 
+        public object? exExpressionStmt(ExpressionStmt stmt)
+        {
+            evaluate(stmt.expression);
+            return null;
+        }
+
+        public object? exPrint(Print stmt)
+        {
+            object? val = evaluate(stmt.expression);
+            Console.WriteLine(stringify(val));
+            return null;
+        }
+
+        #region opMethods
         public object opLiteral(Literal expr)
         {
             return expr.value ?? "nil";
@@ -89,10 +106,16 @@ namespace my_jlox
 
             return null;
         }
+        #endregion
 
         private object evaluate(Expr expr)
         {
             return expr.pickForOp(this);
+        }
+
+        private void execute(Stmt stmt)
+        {
+            stmt.pickForExecute(this);
         }
 
         private bool isTruthy(object? val)
