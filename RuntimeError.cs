@@ -9,8 +9,7 @@ namespace my_jlox
 {
     public class RuntimeError : Exception
     {
-        private Token token;
-
+        public Token token { get; set; }
         public RuntimeError(Token token, string message) : base(message)
         {            
             this.token = token;

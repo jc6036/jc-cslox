@@ -4,9 +4,17 @@ namespace my_jlox
 {
     public class Interpreter : Operate<object>
     {
-        public object interpret(Expr expr)
+        public void interpret(Expr expr)
         {
-            return expr.pickForOp(this);
+            try
+            {
+                object value = evaluate(expr);
+                Console.WriteLine(stringify(value));
+            }
+            catch (RuntimeError ex)
+            {
+                Lox.runtimeError(ex);
+            }
         }
 
         public object opLiteral(Literal expr)
@@ -115,6 +123,25 @@ namespace my_jlox
             if (left.GetType() == typeof(float) && right.GetType() == typeof(float)) return;
             // otherwise
             throw new RuntimeError(oprtr, "Operands must be numbers.");
+        }
+
+        private string stringify(object val)
+        {
+            if (val == null) return "nil";
+
+            if(val.GetType() == typeof(float))
+            {
+                string text = $"{val}";
+
+                if (text.EndsWith(".0")) // I'm not sure why this is cut off, but again I'm going with the book
+                {
+                    text = text.Substring(0, text.Length - 2);
+                }
+
+                return text;
+            }
+
+            return $"{val}";
         }
     }
 }

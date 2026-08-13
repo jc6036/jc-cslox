@@ -4,7 +4,9 @@ namespace my_jlox
 {
     internal static class Lox
     {
+        private static Interpreter interpreter = new Interpreter();
         private static bool hadError = false;
+        private static bool hadRuntimeError = false;
 
         public static void Main(string[] args)
         {
@@ -37,7 +39,7 @@ namespace my_jlox
 
             if (hadError || expression == null) return;
 
-            Console.WriteLine(new AstPrinter().print(expression));
+            interpreter.interpret(expression);
         }
 
         // Wrapper for Run
@@ -48,6 +50,7 @@ namespace my_jlox
             Run(source);
 
             if (hadError) Environment.Exit(65);
+            if (hadRuntimeError) Environment.Exit(70);
         }
 
         // Wrapper for Run
@@ -84,6 +87,12 @@ namespace my_jlox
             {
                 Report(token.line, $" at '{token.lexeme}'", message);
             }
+        }
+
+        public static void runtimeError(RuntimeError error)
+        {
+            Console.Error.WriteLine($"{error.Message}\n[line {error.token.line}]");
+            hadRuntimeError = true;
         }
 
         private static void Report(int line, string where, string message)
