@@ -73,6 +73,18 @@ namespace my_jlox
             Report(line, "", message);
         }
 
+        public static void Error(Token token, string message)
+        {
+            if (token.type == TokenType.EOF)
+            {
+                Report(token.line, " at end", message);
+            }
+            else
+            {
+                Report(token.line, $" at '{token.lexeme}'", message);
+            }
+        }
+
         private static void Report(int line, string where, string message)
         {
             Console.Error.WriteLine($"[Line {line} ] Error{where}: {message}"); // Very basic, possible upgrade, make rust-like error reporting

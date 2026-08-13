@@ -60,9 +60,9 @@ namespace my_jlox
 
     public class Literal : Expr
     {
-        public object value;
+        public object? value;
 
-        public Literal(object value)
+        public Literal(object? value)
         {
             this.value = value;
         }
