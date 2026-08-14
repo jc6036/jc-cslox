@@ -13,7 +13,7 @@ namespace my_jlox
             if (args.Length > 1)
             {
                 Console.WriteLine("Usage: jlox [script]");
-                Environment.Exit(64);
+                System.Environment.Exit(64);
             }
 
             if (args.Length == 1)
@@ -25,7 +25,7 @@ namespace my_jlox
                 RunPrompt();
             }
 
-            Environment.Exit(0);
+            System.Environment.Exit(0);
         }
 
         // Primary instruction executor
@@ -49,8 +49,8 @@ namespace my_jlox
 
             Run(source);
 
-            if (hadError) Environment.Exit(65);
-            if (hadRuntimeError) Environment.Exit(70);
+            if (hadError) System.Environment.Exit(65);
+            if (hadRuntimeError) System.Environment.Exit(70);
         }
 
         // Wrapper for Run

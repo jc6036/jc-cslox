@@ -50,6 +50,16 @@ namespace my_jlox
                 return "nil";
         }
 
+        public string opAssign(Assign expr)
+        {
+            return parenthesize(expr.name.lexeme, expr.value);
+        }
+
+        public string opVariable(Variable expr)
+        {
+            return parenthesize($"var {expr.name.lexeme}");
+        }
+
         private string parenthesize(string name, params Expr[] exprs)
         {
             StringBuilder builder = new StringBuilder();

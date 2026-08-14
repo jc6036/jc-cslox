@@ -11,6 +11,7 @@ namespace my_jlox
         public T exExpressionStmt(ExpressionStmt expression);
         public T exPrint(Print print);
         public T exVar(Var var);
+        public T exBlock(Block block);
     }
 
     public abstract class Stmt
@@ -61,6 +62,21 @@ namespace my_jlox
         public override T pickForExecute<T>(Execute<T> exPicker)
         {
             return exPicker.exVar(this);
+        }
+    }
+
+    public class Block : Stmt
+    {
+        public List<Stmt> statements;
+
+        public Block(List<Stmt> statements)
+        {
+            this.statements = statements;
+        }
+
+        public override T pickForExecute<T>(Execute<T> exPicker)
+        {
+            return exPicker.exBlock(this);
         }
     }
 }

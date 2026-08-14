@@ -32,11 +32,25 @@ namespace my_jlox
         private Stmt statement()
         {
             if (match(TokenType.PRINT)) return printStatement();
+            if (match(TokenType.LEFT_BRACE)) return new Block(block());
 
             return expressionStatement();
         }
 
-        private Stmt declaration()
+        private List<Stmt> block()
+        {
+            List<Stmt> statements = new List<Stmt>();
+
+            while(!check(TokenType.RIGHT_BRACE) && !isAtEnd())
+            {                
+                statements.Add(declaration());
+            }
+
+            consume(TokenType.RIGHT_BRACE, "Expect '}' after block.");
+            return statements;
+        }
+
+        private Stmt? declaration() // null checks all over the damn place, hard to work out with the given patterns
         {
             try
             {
@@ -44,7 +58,7 @@ namespace my_jlox
 
                 return statement();
             }
-            catch (ParseException e)
+            catch (ParseException)
             {
                 synchronize();
                 return null;
@@ -76,14 +90,35 @@ namespace my_jlox
         {
             Expr expr = expression();
 
-            consume(TokenType.SEMICOLON, "Expet ';' after expression.");
+            consume(TokenType.SEMICOLON, "Expect ';' after expression.");
             return new ExpressionStmt(expr);
         }
 
         #region recursive descent expression parsing
         private Expr expression()
         {
-            return equality();
+            return assignment();
+        }
+
+        private Expr assignment()
+        {
+            Expr expr = equality();
+
+            if (match(TokenType.EQUAL))
+            {
+                Token equals = previous();
+                Expr value = assignment();
+
+                if (expr.GetType() == typeof(Variable))
+                {
+                    Token name = ((Variable)expr).name;
+                    return new Assign(name, value);
+                }
+
+                error(equals, "Invalid assignment target.");
+            }
+
+            return expr;
         }
 
         private Expr equality()

@@ -57,6 +57,12 @@ namespace my_jlox
             environment.define(stmt.name.lexeme, value);
             return null;
         }
+
+        public object? exBlock(Block stmt)
+        {
+            executeBlock(stmt.statements, new Environment(environment));
+            return null;
+        }
         #endregion
 
         #region opMethods
@@ -137,6 +143,13 @@ namespace my_jlox
         {
             return environment.get(expr.name);
         }
+
+        public object? opAssign(Assign expr)
+        {
+            object value = evaluate(expr.value);
+            environment.assign(expr.name, value);
+            return value;
+        }
         #endregion
 
         private bool isTruthy(object? val)
@@ -186,6 +199,24 @@ namespace my_jlox
             }
 
             return $"{val}";
+        }
+
+        private void executeBlock(List<Stmt> statements, Environment environment)
+        {
+            Environment previous = this.environment;
+            try
+            {
+                this.environment = environment;
+
+                foreach (Stmt statement in statements)
+                {
+                    execute(statement);
+                }
+            }
+            finally
+            {
+                this.environment = previous;
+            }
         }
     }
 }

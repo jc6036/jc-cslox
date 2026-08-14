@@ -17,6 +17,7 @@ namespace my_jlox
         public T? opUnary(Unary unary);
         public T opLiteral(Literal litearl);
         public T? opVariable(Variable var);
+        public T? opAssign(Assign assign);
     }
 
     public abstract class Expr
@@ -103,6 +104,23 @@ namespace my_jlox
         public override T pickForOp<T>(Operate<T> opPicker)
         {
             return opPicker.opVariable(this);
+        }
+    }
+
+    public class Assign : Expr
+    {
+        public Token name;
+        public Expr value;
+
+        public Assign(Token name, Expr value)
+        {
+            this.name = name;
+            this.value = value;
+        }
+
+        public override T pickForOp<T>(Operate<T> opPicker)
+        {
+            return opPicker.opAssign(this);
         }
     }
 }
