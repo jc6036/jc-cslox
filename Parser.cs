@@ -1,5 +1,8 @@
 ﻿using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
+using System.Xml.Linq;
 
 namespace my_jlox
 {
@@ -18,9 +21,9 @@ namespace my_jlox
         public List<Stmt> parse()
         {
             List<Stmt> statements = new List<Stmt>();
-            while(! isAtEnd())
+            while(!isAtEnd())
             {
-                statements.Add(statement());
+                statements.Add(declaration());
             }
 
             return statements;
@@ -31,6 +34,35 @@ namespace my_jlox
             if (match(TokenType.PRINT)) return printStatement();
 
             return expressionStatement();
+        }
+
+        private Stmt declaration()
+        {
+            try
+            {
+                if (match(TokenType.VAR)) return varDeclaration();
+
+                return statement();
+            }
+            catch (ParseException e)
+            {
+                synchronize();
+                return null;
+            }
+        }
+
+        private Stmt varDeclaration()
+        {
+            Token name = consume(TokenType.IDENTIFIER, "Expect variable name.");
+
+            Expr? initializer = null;
+            if(match(TokenType.EQUAL))
+            {
+                initializer = expression();
+            }
+
+            consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.");
+            return new Var(name, initializer);
         }
 
         private Stmt printStatement()
@@ -131,6 +163,11 @@ namespace my_jlox
             if(match(TokenType.NUMBER, TokenType.STRING))
             {
                 return new Literal(previous().literal);
+            }
+
+            if(match(TokenType.IDENTIFIER))
+            {
+                return new Variable(previous());
             }
 
             if(match(TokenType.LEFT_PAREN))

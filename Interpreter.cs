@@ -5,6 +5,8 @@ namespace my_jlox
 {
     public class Interpreter : Operate<object>, Execute<object?>
     {
+        private Environment environment = new Environment();
+
         public void interpret(List<Stmt> statements)
         {
             try
@@ -20,6 +22,17 @@ namespace my_jlox
             }
         }
 
+        private object evaluate(Expr expr)
+        {
+            return expr.pickForOp(this);
+        }
+
+        private void execute(Stmt stmt)
+        {
+            stmt.pickForExecute(this);
+        }
+
+        #region exMethods
         public object? exExpressionStmt(ExpressionStmt stmt)
         {
             evaluate(stmt.expression);
@@ -32,6 +45,19 @@ namespace my_jlox
             Console.WriteLine(stringify(val));
             return null;
         }
+
+        public object? exVar(Var stmt)
+        {
+            object? value = null;
+            if(stmt.initializer != null)
+            {
+                value = evaluate(stmt.initializer);
+            }
+
+            environment.define(stmt.name.lexeme, value);
+            return null;
+        }
+        #endregion
 
         #region opMethods
         public object opLiteral(Literal expr)
@@ -106,17 +132,12 @@ namespace my_jlox
 
             return null;
         }
+
+        public object? opVariable(Variable expr)
+        {
+            return environment.get(expr.name);
+        }
         #endregion
-
-        private object evaluate(Expr expr)
-        {
-            return expr.pickForOp(this);
-        }
-
-        private void execute(Stmt stmt)
-        {
-            stmt.pickForExecute(this);
-        }
 
         private bool isTruthy(object? val)
         {

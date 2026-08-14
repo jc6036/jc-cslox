@@ -12,15 +12,16 @@ namespace my_jlox
     // And we can add new operations on expressions by adding a new operation class and implementing visitor
     public interface Operate<T>
     {
-        public T opBinary(Binary binary);
+        public T? opBinary(Binary binary);
         public T opGrouping(Grouping grouping);
-        public T opUnary(Unary unary);
+        public T? opUnary(Unary unary);
         public T opLiteral(Literal litearl);
+        public T? opVariable(Variable var);
     }
 
     public abstract class Expr
     {
-        public abstract T pickForOp<T>(Operate<T> opPicker); // Main operation execution point
+        public abstract T? pickForOp<T>(Operate<T> opPicker); // Main operation execution point
                                                              // oop trick automatically routes via extension type and visitor type to the correct operation code
     }
 
@@ -87,6 +88,21 @@ namespace my_jlox
         public override T pickForOp<T>(Operate<T> opPicker)
         {
             return opPicker.opUnary(this);
+        }
+    }
+
+    public class Variable : Expr
+    {
+        public Token name;
+
+        public Variable(Token name)
+        {
+            this.name = name;
+        }
+
+        public override T pickForOp<T>(Operate<T> opPicker)
+        {
+            return opPicker.opVariable(this);
         }
     }
 }

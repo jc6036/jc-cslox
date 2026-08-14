@@ -10,6 +10,7 @@ namespace my_jlox
     {
         public T exExpressionStmt(ExpressionStmt expression);
         public T exPrint(Print print);
+        public T exVar(Var var);
     }
 
     public abstract class Stmt
@@ -43,6 +44,23 @@ namespace my_jlox
         public override T pickForExecute<T>(Execute<T> exPicker)
         {
             return exPicker.exPrint(this);
+        }
+    }
+
+    public class Var : Stmt
+    {
+        public Token name;
+        public Expr? initializer;
+
+        public Var(Token name, Expr? initializer)
+        {
+            this.name = name;
+            this.initializer = initializer;
+        }
+
+        public override T pickForExecute<T>(Execute<T> exPicker)
+        {
+            return exPicker.exVar(this);
         }
     }
 }
