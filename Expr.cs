@@ -18,6 +18,7 @@ namespace my_jlox
         public T opLiteral(Literal litearl);
         public T? opVariable(Variable var);
         public T? opAssign(Assign assign);
+        public T opLogical(Logical logical);
     }
 
     public abstract class Expr
@@ -123,4 +124,24 @@ namespace my_jlox
             return opPicker.opAssign(this);
         }
     }
+
+    public class Logical : Expr
+    {
+        public Expr left;
+        public Token oprtr;
+        public Expr right;
+
+        public Logical(Token oprtr, Expr left, Expr right)
+        {
+            this.oprtr = oprtr;
+            this.left = left;
+            this.right = right;
+        }
+
+        public override T pickForOp<T>(Operate<T> opPicker)
+        {
+            return opPicker.opLogical(this);
+        }
+    }
+
 }

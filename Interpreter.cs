@@ -39,6 +39,20 @@ namespace my_jlox
             return null;
         }
 
+        public object? exIf(If stmt)
+        {
+            if(isTruthy(evaluate(stmt.condition)))
+            {
+                execute(stmt.thenBranch);
+            }
+            else if (stmt.elseBranch != null)
+            {
+                execute(stmt.elseBranch);
+            }
+
+            return null;
+        }
+
         public object? exPrint(Print stmt)
         {
             object? val = evaluate(stmt.expression);
@@ -61,6 +75,16 @@ namespace my_jlox
         public object? exBlock(Block stmt)
         {
             executeBlock(stmt.statements, new Environment(environment));
+            return null;
+        }
+
+        public object? exWhile(While stmt)
+        {
+            while(isTruthy(evaluate(stmt.condition)))
+            {
+                execute(stmt.body);
+            }
+
             return null;
         }
         #endregion
@@ -149,6 +173,24 @@ namespace my_jlox
             object value = evaluate(expr.value);
             environment.assign(expr.name, value);
             return value;
+        }
+
+        public object opLogical(Logical expr)
+        {
+            object left = evaluate(expr.left);
+
+            if(expr.oprtr.type == TokenType.OR)
+            {
+                if (isTruthy(left))
+                    return left;
+            }
+            else
+            {
+                if (!isTruthy(left)) 
+                    return left;
+            }
+
+            return evaluate(expr.right);
         }
         #endregion
 

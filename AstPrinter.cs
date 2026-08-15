@@ -20,7 +20,7 @@ namespace my_jlox
     // with minimal need to edit the expr subtypes themselves
     // New expr types are harder to add, as the base Operate interface and all implementers will need updated with new behavior
     // once the expr subtype is added, but that's the tradeoff
-    public class AstPrinter : Operate<string>
+    /*public class AstPrinter : Operate<string>
     {
         public string print(Expr expr)
         {
@@ -74,5 +74,5 @@ namespace my_jlox
 
             return builder.ToString();
         }
-    }
+    }*/
 }

@@ -12,6 +12,8 @@ namespace my_jlox
         public T exPrint(Print print);
         public T exVar(Var var);
         public T exBlock(Block block);
+        public T exIf(If ifStmt);
+        public T exWhile(While whileStmt);
     }
 
     public abstract class Stmt
@@ -77,6 +79,42 @@ namespace my_jlox
         public override T pickForExecute<T>(Execute<T> exPicker)
         {
             return exPicker.exBlock(this);
+        }
+    }
+
+    public class If : Stmt
+    {
+        public Expr condition;
+        public Stmt thenBranch;
+        public Stmt? elseBranch;
+
+        public If(Expr condition, Stmt thenBranch, Stmt? elseBranch)
+        {
+            this.condition = condition;
+            this.thenBranch = thenBranch;
+            this.elseBranch = elseBranch;
+        }
+
+        public override T pickForExecute<T>(Execute<T> exPicker)
+        {
+            return exPicker.exIf(this);
+        }
+    }
+
+    public class While : Stmt
+    {
+        public Expr condition;
+        public Stmt body;
+
+        public While(Expr condition, Stmt body)
+        {
+            this.condition = condition;
+            this.body = body;
+        }
+
+        public override T pickForExecute<T>(Execute<T> exPicker)
+        {
+            return exPicker.exWhile(this);
         }
     }
 }
