@@ -68,7 +68,7 @@ namespace my_jlox
                 value = evaluate(stmt.initializer);
             }
 
-            environment.define(stmt.name.lexeme, value);
+            environment.define(stmt.name, value);
             return null;
         }
 

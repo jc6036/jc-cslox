@@ -91,7 +91,7 @@ namespace my_jlox
 
         public static void runtimeError(RuntimeError error)
         {
-            Console.Error.WriteLine($"{error.Message}\n[line {error.token.line}]");
+            Console.Error.WriteLine($"Runtime Error: {error.Message}\n[line {error.token.line}]");
             hadRuntimeError = true;
         }
 

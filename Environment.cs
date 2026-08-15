@@ -30,9 +30,14 @@
             throw new RuntimeError(name, $"Undefined variable '{name.lexeme}'.");
         }
 
-        public void define(string name, object? value)
+        public void define(Token name, object? value)
         {
-            values.Add(name, value);
+            if(values.ContainsKey(name.lexeme))
+            {
+                throw new RuntimeError(name, $"Attempted declaration of existing variable '{name.lexeme}'.");
+            }
+
+            values.Add(name.lexeme, value);
         }
 
         public void assign(Token name, object? value)
