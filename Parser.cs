@@ -57,6 +57,7 @@ namespace my_jlox
         {
             try
             {
+                if (match(TokenType.FUN)) return function("function");
                 if (match(TokenType.VAR)) return varDeclaration();
 
                 return statement();
@@ -66,6 +67,31 @@ namespace my_jlox
                 synchronize();
                 return null;
             }
+        }
+
+        private Function function(string kind)
+        {
+            Token name = consume(TokenType.IDENTIFIER, $"Expect {kind} name.");
+            consume(TokenType.LEFT_PAREN, $"Expect '(' after {kind} name.");
+
+            List<Token> parameters = new List<Token>();
+            if(!check(TokenType.RIGHT_PAREN))
+            {
+                do
+                {
+                    if(parameters.Count >= 255)
+                    {
+                        error(peek(), "Can't have more than 255 params.");
+                    }
+
+                    parameters.Add(consume(TokenType.IDENTIFIER, "Expect param name."));
+                } while (match(TokenType.COMMA));
+            }
+            consume(TokenType.RIGHT_PAREN, "Expect ')' after params.");
+
+            consume(TokenType.LEFT_BRACE, $"Expect '{"{"}' before {kind} body.");
+            List<Stmt> body = block();
+            return new Function(name, parameters, body);
         }
 
         private Stmt varDeclaration()
@@ -290,7 +316,22 @@ namespace my_jlox
                 return new Unary(oprtr, right);
             }
 
-            return primary();
+            return call();
+        }
+
+        private Expr call()
+        {
+            Expr expr = primary();
+
+            while (true)
+            {
+                if (match(TokenType.LEFT_PAREN))
+                    expr = finishCall(expr);
+                else
+                    break;
+            }
+
+            return expr;
         }
 
         private Expr primary()
@@ -317,6 +358,28 @@ namespace my_jlox
             }
 
             throw error(peek(), "Expected expression.");
+        }
+
+        private Expr finishCall(Expr callee)
+        {
+            List<Expr> arguments = new List<Expr>();
+
+            if(!check(TokenType.RIGHT_PAREN))
+            {
+                do
+                {
+                    if(arguments.Count >= 255)
+                    {
+                        error(peek(), "Can't have more than 255 args."); // Bit arbitrary, based on java arg limit from text
+                    }
+
+                    arguments.Add(expression());
+                } while (match(TokenType.COMMA));
+            }
+
+            Token paren = consume(TokenType.RIGHT_PAREN, "Expect ')' after args.");
+
+            return new Call(callee, paren, arguments);
         }
         #endregion
 

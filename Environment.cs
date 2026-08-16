@@ -34,7 +34,7 @@
         {
             if(values.ContainsKey(name.lexeme))
             {
-                throw new RuntimeError(name, $"Attempted declaration of existing variable '{name.lexeme}'.");
+                throw new RuntimeError(name, $"Attempted declaration of existing object '{name.lexeme}'.");
             }
 
             values.Add(name.lexeme, value);

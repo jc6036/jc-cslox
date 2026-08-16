@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,6 +15,7 @@ namespace my_jlox
         public T exBlock(Block block);
         public T exIf(If ifStmt);
         public T exWhile(While whileStmt);
+        public T exFunction(Function functionStmt);
     }
 
     public abstract class Stmt
@@ -115,6 +117,25 @@ namespace my_jlox
         public override T pickForExecute<T>(Execute<T> exPicker)
         {
             return exPicker.exWhile(this);
+        }
+    }
+
+    public class Function : Stmt
+    {
+        public Token name;
+        public List<Token> paramlist;
+        public List<Stmt> body;
+
+        public Function(Token name, List<Token> paramlist, List<Stmt> body)
+        {
+            this.name = name;
+            this.paramlist = paramlist;
+            this.body = body;
+        }
+
+        public override T pickForExecute<T>(Execute<T> exPicker)
+        {
+            return exPicker.exFunction(this);
         }
     }
 }

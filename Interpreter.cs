@@ -1,11 +1,23 @@
 ﻿using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography.X509Certificates;
 
 namespace my_jlox
 {
     public class Interpreter : Operate<object>, Execute<object?>
     {
-        private Environment environment = new Environment();
+        public Environment globals;
+        public Environment environment;
+
+        public Interpreter()
+        {
+            this.globals = new Environment();
+            this.environment = globals;
+
+            // Book wants me to use an anon class here, but C# doesn't have that that I'm aware of
+            // So I defined a global func call by hand
+            globals.define(new Token(TokenType.IDENTIFIER, "clock", null, 0), new Clock());
+        }
 
         public void interpret(List<Stmt> statements)
         {
@@ -84,6 +96,15 @@ namespace my_jlox
             {
                 execute(stmt.body);
             }
+
+            return null;
+        }
+
+        public object? exFunction(Function stmt)
+        {
+            LoxFunction function = new LoxFunction(stmt);
+
+            environment.define(stmt.name, function);
 
             return null;
         }
@@ -192,6 +213,31 @@ namespace my_jlox
 
             return evaluate(expr.right);
         }
+
+        public object opCall(Call expr)
+        {
+            object callee = evaluate(expr.callee);
+
+            List<object> arguments = new List<object>();
+            foreach(Expr argument in expr.arguments)
+            {
+                arguments.Add(evaluate(argument));
+            }
+
+            if(callee.GetType().GetInterface("LoxCallable") != typeof(LoxCallable)) // Was tricky to adapt this to C#, but good reminder java instanceof != C# typeof
+            {
+                throw new RuntimeError(expr.paren, "Can only call functions and classes.");
+            }
+
+            LoxCallable function = (LoxCallable)callee;
+
+            if(arguments.Count != function.arity())
+            {
+                throw new RuntimeError(expr.paren, $"Expected {function.arity()} arguments but got {arguments.Count}.");
+            }
+
+            return function.call(this, arguments);
+        }
         #endregion
 
         private bool isTruthy(object? val)
@@ -243,7 +289,7 @@ namespace my_jlox
             return $"{val}";
         }
 
-        private void executeBlock(List<Stmt> statements, Environment environment)
+        public void executeBlock(List<Stmt> statements, Environment environment)
         {
             Environment previous = this.environment;
             try

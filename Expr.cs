@@ -19,6 +19,7 @@ namespace my_jlox
         public T? opVariable(Variable var);
         public T? opAssign(Assign assign);
         public T opLogical(Logical logical);
+        public T opCall(Call function);
     }
 
     public abstract class Expr
@@ -144,4 +145,22 @@ namespace my_jlox
         }
     }
 
+    public class Call : Expr
+    {
+        public Expr callee;
+        public Token paren;
+        public List<Expr> arguments;
+
+        public Call(Expr callee, Token paren, List<Expr> arguments)
+        {
+            this.callee = callee;
+            this.paren = paren;
+            this.arguments = arguments;
+        }
+
+        public override T pickForOp<T>(Operate<T> opPicker)
+        {
+            return opPicker.opCall(this);
+        }
+    }
 }

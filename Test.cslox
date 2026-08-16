@@ -1,7 +1,12 @@
-﻿var hello = "Hello World!";
-var x = 0;
-while(x <= 10)
+﻿fun helloWorld(testStr)
 {
-	print hello;
-	x = x + 1;
+	if (testStr == "")
+	{
+		print "Hello world!";
+	}
+
+	print testStr;
 }
+
+helloWorld("");
+helloWorld("This is a test!");
