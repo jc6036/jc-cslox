@@ -42,7 +42,6 @@ namespace my_jlox
 
         public object? call(Interpreter interpreter, List<object> arguments)
         {
-
             Environment environment = new Environment(closure);
             for(int i = 0; i < declaration.paramlist.Count; i++)
             {
