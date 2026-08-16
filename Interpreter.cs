@@ -102,7 +102,7 @@ namespace my_jlox
 
         public object? exFunction(Function stmt)
         {
-            LoxFunction function = new LoxFunction(stmt);
+            LoxFunction function = new LoxFunction(stmt, environment);
 
             environment.define(stmt.name, function);
 
