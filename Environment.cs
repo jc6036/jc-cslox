@@ -30,6 +30,37 @@
             throw new RuntimeError(name, $"Undefined variable '{name.lexeme}'.");
         }
 
+        public object? getAt(int distance, string name)
+        {
+            if (ancestor(distance).values.ContainsKey(name))
+                return ancestor(distance).values[name];
+            else
+                return null;
+        }
+
+        public void assignAt(int distance, Token name, object value)
+        {
+            if(ancestor(distance).values.ContainsKey(name.lexeme))
+            {
+                ancestor(distance).values[name.lexeme] = value;
+            }
+            else
+            {
+                ancestor(distance).values.Add(name.lexeme, value);
+            }
+        }
+
+        private Environment ancestor(int distance)
+        {
+            Environment environment = this;
+            for(int i = 0; i < distance; i++)
+            {
+                environment = environment.enclosing;
+            }
+
+            return environment; // Won't be null, getAt only ever called after checking we have multiple envs. Null ref is fine, will let us debug for now
+        }
+
         public void define(Token name, object? value)
         {
             if(values.ContainsKey(name.lexeme))

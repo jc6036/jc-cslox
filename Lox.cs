@@ -39,6 +39,11 @@ namespace my_jlox
 
             if (hadError || statements == null) return;
 
+            Resolver resolver = new Resolver(interpreter);
+            resolver.resolve(statements);
+
+            if (hadError) return;
+
             interpreter.interpret(statements);
         }
 

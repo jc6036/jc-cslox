@@ -1,4 +1,5 @@
-﻿using System.Reflection.Metadata;
+﻿using System.Data;
+using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 
@@ -8,6 +9,7 @@ namespace my_jlox
     {
         public Environment globals;
         public Environment environment;
+        private Dictionary<Expr, int> locals = new Dictionary<Expr, int>();
 
         public Interpreter()
         {
@@ -42,6 +44,11 @@ namespace my_jlox
         private void execute(Stmt stmt)
         {
             stmt.pickForExecute(this);
+        }
+
+        public void resolve(Expr expr, int depth)
+        {
+            locals.Add(expr, depth);
         }
 
         #region exMethods
@@ -194,13 +201,28 @@ namespace my_jlox
 
         public object? opVariable(Variable expr)
         {
-            return environment.get(expr.name);
+            return lookupVariable(expr.name, expr);
         }
 
         public object? opAssign(Assign expr)
         {
             object value = evaluate(expr.value);
-            environment.assign(expr.name, value);
+
+            int? distance = null;
+            if(locals.ContainsKey(expr))
+            {
+                distance = locals[expr];
+            }
+
+            if(distance != null)
+            {
+                environment.assignAt(distance!.Value, expr.name, value);
+            }
+            else
+            {
+                globals.assign(expr.name, value);
+            }
+
             return value;
         }
 
@@ -276,6 +298,20 @@ namespace my_jlox
             if (left.GetType() == typeof(float) && right.GetType() == typeof(float)) return;
             // otherwise
             throw new RuntimeError(oprtr, "Operands must be numbers.");
+        }
+
+        private object? lookupVariable(Token name, Expr expr)
+        {
+            int? distance;
+            if (locals.ContainsKey(expr))
+                distance = locals[expr];
+            else
+                distance = null;
+
+            if (distance != null)
+                return environment.getAt(distance!.Value, name.lexeme);
+            else
+                return globals.get(name);
         }
 
         private string stringify(object val)
