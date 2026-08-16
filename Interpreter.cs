@@ -108,6 +108,14 @@ namespace my_jlox
 
             return null;
         }
+
+        public object? exReturn(Return stmt)
+        {
+            object value = null;
+            if (stmt.value != null) value = evaluate(stmt.value);
+
+            throw new ReturnException(value);
+        }
         #endregion
 
         #region opMethods

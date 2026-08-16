@@ -34,6 +34,7 @@ namespace my_jlox
             if (match(TokenType.FOR)) return forStatement();
             if (match(TokenType.IF)) return ifStatement();
             if (match(TokenType.PRINT)) return printStatement();
+            if (match(TokenType.RETURN)) return returnStatement();
             if (match(TokenType.WHILE)) return whileStatement();
             if (match(TokenType.LEFT_BRACE)) return new Block(block());
 
@@ -194,6 +195,19 @@ namespace my_jlox
             }
 
             return body;
+        }
+
+        private Stmt returnStatement()
+        {
+            Token keyword = previous();
+            Expr value = null;
+            if(!check(TokenType.SEMICOLON))
+            {
+                value = expression();
+            }
+
+            consume(TokenType.SEMICOLON, "Expected ';' after return value.");
+            return new Return(keyword, value);
         }
 
         #region recursive descent expression parsing

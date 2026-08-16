@@ -46,7 +46,15 @@ namespace my_jlox
                 environment.define(declaration.paramlist[i], arguments[i]);
             }
 
-            interpreter.executeBlock(declaration.body, environment);
+            try
+            {
+                interpreter.executeBlock(declaration.body, environment);
+            }
+            catch (ReturnException e) // Using exceptions to pass return values and unwind the stack is insane
+            {
+                return e.value;
+            }
+
             return null;
         }
 
