@@ -29,3 +29,21 @@ fun counter(howManyToCount)
 }
 
 counter(10);
+
+// Classes
+class Foo
+{
+	init() {
+		print "I'm in a class!";
+	}
+
+	bar() {
+		var x = this.a + this.b;
+		print x;
+	}
+}
+
+var myClass = Foo();
+myClass.a = 10;
+myClass.b = 20;
+myClass.bar();

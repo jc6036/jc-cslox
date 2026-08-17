@@ -20,12 +20,15 @@ namespace my_jlox
         public T? opAssign(Assign assign);
         public T opLogical(Logical logical);
         public T opCall(Call function);
+        public T opGet(Get get);
+        public T opSet(Set set);
+        public T opThis(This thisExpr);
     }
 
     public abstract class Expr
     {
         public abstract T? pickForOp<T>(Operate<T> opPicker); // Main operation execution point
-                                                             // oop trick automatically routes via extension type and visitor type to the correct operation code
+                                                              // oop trick automatically routes via extension type and visitor type to the correct operation code
     }
 
     public class Binary : Expr
@@ -161,6 +164,57 @@ namespace my_jlox
         public override T pickForOp<T>(Operate<T> opPicker)
         {
             return opPicker.opCall(this);
+        }
+    }
+
+    public class Get : Expr
+    {
+        public Expr obj;
+        public Token name;
+
+        public Get(Expr obj, Token name)
+        {
+            this.obj = obj;
+            this.name = name;
+        }
+
+        public override T pickForOp<T>(Operate<T> opPicker)
+        {
+            return opPicker.opGet(this);
+        }
+    }
+
+    public class Set : Expr
+    {
+        public Expr obj;
+        public Token name;
+        public Expr value;
+
+        public Set(Expr obj, Token name, Expr value)
+        {
+            this.obj = obj;
+            this.name = name;
+            this.value = value;
+        }
+
+        public override T pickForOp<T>(Operate<T> opPicker)
+        {
+            return opPicker.opSet(this);
+        }
+    }
+
+    public class This : Expr
+    {
+        public Token keyword;
+
+        public This(Token keyword)
+        {
+            this.keyword = keyword;
+        }
+
+        public override T pickForOp<T>(Operate<T> opPicker)
+        {
+            return opPicker.opThis(this);
         }
     }
 }

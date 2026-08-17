@@ -17,6 +17,7 @@ namespace my_jlox
         public T exWhile(While whileStmt);
         public T exFunction(Function functionStmt);
         public T exReturn(Return returnStmt);
+        public T exClass(Class classStmt);
     }
 
     public abstract class Stmt
@@ -154,6 +155,23 @@ namespace my_jlox
         public override T pickForExecute<T>(Execute<T> exPicker)
         {
             return exPicker.exReturn(this);
+        }
+    }
+
+    public class Class : Stmt
+    {
+        public Token name;
+        public List<Function> methods;
+
+        public Class(Token name, List<Function> methods)
+        {
+            this.name = name;
+            this.methods = methods;
+        }
+
+        public override T pickForExecute<T>(Execute<T> exPicker)
+        {
+            return exPicker.exClass(this);
         }
     }
 }

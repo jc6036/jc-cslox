@@ -58,6 +58,7 @@ namespace my_jlox
         {
             try
             {
+                if (match(TokenType.CLASS)) return classDeclaration();
                 if (match(TokenType.FUN)) return function("function");
                 if (match(TokenType.VAR)) return varDeclaration();
 
@@ -107,6 +108,22 @@ namespace my_jlox
 
             consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.");
             return new Var(name, initializer);
+        }
+
+        private Stmt classDeclaration()
+        {
+            Token name = consume(TokenType.IDENTIFIER, "Expect class name.");
+            consume(TokenType.LEFT_BRACE, "Expect '{' before class body.");
+
+            List<Function> methods = new List<Function>();
+            while(!check(TokenType.RIGHT_BRACE) && !isAtEnd())
+            {
+                methods.Add(function("method"));
+            }
+
+            consume(TokenType.RIGHT_BRACE, "Expect '}' after class body.");
+
+            return new Class(name, methods);
         }
 
         private Stmt printStatement()
@@ -230,8 +247,13 @@ namespace my_jlox
                     Token name = ((Variable)expr).name;
                     return new Assign(name, value);
                 }
+                else if (expr.GetType() == typeof(Get))
+                {
+                    Get get = (Get)expr;
+                    return new Set(get.obj, get.name, value);
+                }
 
-                error(equals, "Invalid assignment target.");
+                    error(equals, "Invalid assignment target.");
             }
 
             return expr;
@@ -340,7 +362,14 @@ namespace my_jlox
             while (true)
             {
                 if (match(TokenType.LEFT_PAREN))
+                {
                     expr = finishCall(expr);
+                }
+                else if (match(TokenType.DOT))
+                {
+                    Token name = consume(TokenType.IDENTIFIER, "Expect prop name after '.'.");
+                    expr = new Get(expr, name);
+                }
                 else
                     break;
             }
@@ -358,6 +387,8 @@ namespace my_jlox
             {
                 return new Literal(previous().literal);
             }
+
+            if (match(TokenType.THIS)) return new This(previous());
 
             if(match(TokenType.IDENTIFIER))
             {

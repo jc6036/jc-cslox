@@ -7,6 +7,7 @@ namespace my_jlox
         private Interpreter interpreter;
         private Stack<Dictionary<string, bool>> scopes = new Stack<Dictionary<string, bool>>();
         private FunctionType currentFunction = FunctionType.NONE;
+        private ClassType currentClass = ClassType.NONE;
 
         public Resolver(Interpreter interpreter)
         {
@@ -95,6 +96,9 @@ namespace my_jlox
 
             if(stmt.value != null)
             {
+                if (currentFunction == FunctionType.INITIALIZER)
+                    Lox.Error(stmt.keyword, "Can't return a value from an initializer.");
+
                 resolve(stmt.value);
             }
 
@@ -105,6 +109,30 @@ namespace my_jlox
         {
             resolve(stmt.condition);
             resolve(stmt.body);
+            return null;
+        }
+
+        public object? exClass(Class stmt)
+        {
+            ClassType enclosingClass = currentClass;
+            currentClass = ClassType.CLASS;
+
+            declare(stmt.name);
+            define(stmt.name);
+
+            beginScope();
+            scopes.Peek().Add("this", true);
+
+            foreach(Function method in stmt.methods)
+            {
+                FunctionType declaration = FunctionType.METHOD;
+                if (method.name.lexeme == "init") declaration = FunctionType.INITIALIZER;
+                resolveFunction(method, declaration);
+            }
+
+            endScope();
+
+            currentClass = enclosingClass;
             return null;
         }
 
@@ -149,6 +177,31 @@ namespace my_jlox
         public object? opUnary(Unary expr)
         {
             resolve(expr.right);
+            return null;
+        }
+
+        public object? opGet(Get expr)
+        {
+            resolve(expr.obj);
+            return null;
+        }
+
+        public object? opSet(Set expr)
+        {
+            resolve(expr.value);
+            resolve(expr.obj);
+            return null;
+        }
+
+        public object? opThis(This expr)
+        {
+            if (currentClass == ClassType.NONE)
+            {
+                Lox.Error(expr.keyword, "Can't use 'this' outside of a class.");
+                return null;
+            }
+
+            resolveLocal(expr, expr.keyword);
             return null;
         }
 
@@ -233,7 +286,15 @@ namespace my_jlox
         private enum FunctionType
         {
             NONE,
-            FUNCTION
+            FUNCTION,
+            INITIALIZER,
+            METHOD
+        }
+
+        private enum ClassType
+        {
+            NONE,
+            CLASS
         }
     }
 }

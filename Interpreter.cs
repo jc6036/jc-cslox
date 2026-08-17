@@ -1,6 +1,7 @@
 ﻿using System.Data;
 using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
 namespace my_jlox
@@ -109,7 +110,7 @@ namespace my_jlox
 
         public object? exFunction(Function stmt)
         {
-            LoxFunction function = new LoxFunction(stmt, environment);
+            LoxFunction function = new LoxFunction(stmt, environment, false);
 
             environment.define(stmt.name, function);
 
@@ -118,10 +119,26 @@ namespace my_jlox
 
         public object? exReturn(Return stmt)
         {
-            object value = null;
+            object? value = null;
             if (stmt.value != null) value = evaluate(stmt.value);
 
             throw new ReturnException(value);
+        }
+
+        public object? exClass(Class stmt)
+        {
+            environment.define(stmt.name, null);
+
+            Dictionary<string, LoxFunction> methods = new Dictionary<string, LoxFunction>();
+            foreach(Function method in stmt.methods)
+            {
+                LoxFunction function = new LoxFunction(method, environment, method.name.lexeme == "init");
+                methods.Add(method.name.lexeme, function);
+            }
+
+            LoxClass klass = new LoxClass(stmt.name.lexeme, methods);
+            environment.assign(stmt.name, klass);
+            return null;
         }
         #endregion
 
@@ -267,6 +284,37 @@ namespace my_jlox
             }
 
             return function.call(this, arguments);
+        }
+
+        public object opGet(Get expr)
+        {
+            object obj = evaluate(expr.obj);
+            if(obj.GetType() == typeof(LoxInstance))
+            {
+                return ((LoxInstance)obj).get(expr.name);
+            }
+
+            throw new RuntimeError(expr.name, "Only instances have properties.");
+        }
+
+        public object opSet(Set expr)
+        {
+            object obj = evaluate(expr.obj);
+
+            if(obj.GetType() != typeof(LoxInstance))
+            {
+                throw new RuntimeError(expr.name, "Only instances have fields.");
+            }
+
+            object value = evaluate(expr.value);
+
+            ((LoxInstance) obj).set(expr.name, value);
+            return value;
+        }
+
+        public object? opThis(This expr)
+        {
+            return lookupVariable(expr.keyword, expr);
         }
         #endregion
 
