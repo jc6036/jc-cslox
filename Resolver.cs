@@ -120,6 +120,24 @@ namespace my_jlox
             declare(stmt.name);
             define(stmt.name);
 
+            if(stmt.superclass != null &&
+               stmt.name.lexeme == stmt.superclass.name.lexeme)
+            {
+                Lox.Error(stmt.superclass.name, "A class can't inherit from itself.");
+            }
+
+            if(stmt.superclass != null)
+            {
+                currentClass = ClassType.SUBCLASS;
+                resolve(stmt.superclass);
+            }
+
+            if(stmt.superclass != null)
+            {
+                beginScope();
+                scopes.Peek().Add("super", true);
+            }
+
             beginScope();
             scopes.Peek().Add("this", true);
 
@@ -129,8 +147,9 @@ namespace my_jlox
                 if (method.name.lexeme == "init") declaration = FunctionType.INITIALIZER;
                 resolveFunction(method, declaration);
             }
-
+           
             endScope();
+            if (stmt.superclass != null) endScope();
 
             currentClass = enclosingClass;
             return null;
@@ -205,6 +224,21 @@ namespace my_jlox
             return null;
         }
 
+        public object? opSuper(Super expr)
+        {
+            if(currentClass == ClassType.NONE)
+            {
+                Lox.Error(expr.keyword, "Can't use 'super' outside of a class.");
+            }
+            else if(currentClass != ClassType.SUBCLASS)
+            {
+                Lox.Error(expr.keyword, "Can't use 'super' in a class with no superclass.");
+            }
+
+            resolveLocal(expr, expr.keyword);
+            return null;
+        }
+
         public void resolve(List<Stmt> statements)
         {
             foreach(Stmt stmt in statements)
@@ -225,15 +259,14 @@ namespace my_jlox
 
         private void resolveLocal(Expr expr, Token name)
         {
-            var i = scopes.Count;
-            var reverseScopes = scopes.Reverse();                           // Matching some goofiness in the text
-            foreach(var scope in reverseScopes)                             // Apparently java allows indexed access to stacks? LOL
+            var i = 0;                        // Matching some goofiness in the text
+            foreach(var scope in scopes)                             // Apparently java allows indexed access to stacks? LOL
             {                                                               // So I had to recreate what the book is doing
                 if(scope.ContainsKey(name.lexeme))
                 {
-                    interpreter.resolve(expr, scopes.Count - i);
+                    interpreter.resolve(expr, i);
                 }
-                i--;
+                i++;
             }
         }
 
@@ -302,7 +335,8 @@ namespace my_jlox
         private enum ClassType
         {
             NONE,
-            CLASS
+            CLASS,
+            SUBCLASS
         }
     }
 }

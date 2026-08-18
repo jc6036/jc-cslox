@@ -53,12 +53,12 @@
         private Environment ancestor(int distance)
         {
             Environment environment = this;
-            for(int i = 0; i <= distance; i++)
+            for(int i = 0; i < distance; i++)
             {
                 environment = environment.enclosing;
             }
 
-            return environment; // Won't be null, getAt only ever called after checking we have multiple envs. Null ref is fine, will let us debug for now
+            return environment; // Won't be null
         }
 
         public void define(Token name, object? value)

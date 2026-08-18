@@ -9,11 +9,13 @@ namespace my_jlox
     public class LoxClass : LoxCallable
     {
         public string name;
+        public LoxClass? superclass;
         private Dictionary<string, LoxFunction> methods;
 
-        public LoxClass(string name, Dictionary<string, LoxFunction> methods)
+        public LoxClass(string name, LoxClass? superclass, Dictionary<string, LoxFunction> methods)
         { 
             this.name = name;
+            this.superclass = superclass;
             this.methods = methods;
         }
 
@@ -48,6 +50,11 @@ namespace my_jlox
             if(methods.ContainsKey(name))
             {
                 return methods[name];
+            }
+
+            if(superclass != null)
+            {
+                return superclass.findMethod(name);
             }
 
             return null;

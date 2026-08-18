@@ -113,6 +113,14 @@ namespace my_jlox
         private Stmt classDeclaration()
         {
             Token name = consume(TokenType.IDENTIFIER, "Expect class name.");
+
+            Variable? superclass = null;
+            if (match(TokenType.LESS))
+            {
+                consume(TokenType.IDENTIFIER, "Expect superclass name.");
+                superclass = new Variable(previous());
+            }
+
             consume(TokenType.LEFT_BRACE, "Expect '{' before class body.");
 
             List<Function> methods = new List<Function>();
@@ -123,7 +131,7 @@ namespace my_jlox
 
             consume(TokenType.RIGHT_BRACE, "Expect '}' after class body.");
 
-            return new Class(name, methods);
+            return new Class(name, superclass, methods);
         }
 
         private Stmt printStatement()

@@ -1,4 +1,4 @@
-﻿// Test of function definitions
+﻿// Functions
 fun helloWorld(testStr)
 {
 	if (testStr == "")
@@ -12,23 +12,23 @@ fun helloWorld(testStr)
 helloWorld("");
 helloWorld("This is a test!");
 
-// Example of closures working
-fun counter(howManyToCount)
+
+// Closures
+var a = 5;
+fun counter()
 {
-	var a = 0;
-	fun count()
+	fun CheckA()
 	{
 		print a;
-		a = a + 1;		
 	}
-
-	while(a <= howManyToCount)
-	{
-		count();
-	}
+	CheckA(); // Should print 5
+	var a = 10;
+	CheckA(); // Should print 5 still
+	print a;  // Should print 10
 }
 
-counter(10);
+counter();
+
 
 // Classes
 class Foo
@@ -47,3 +47,20 @@ var myClass = Foo();
 myClass.a = 10;
 myClass.b = 20;
 myClass.bar();
+
+
+// Inheritance
+class BarSuper
+{
+	sayHi()
+	{
+		print "I'm in the superclass!";
+	}
+}
+
+class Bar < BarSuper
+{
+}
+
+var myBar = Bar();
+myBar.sayHi(); // Should print the message above

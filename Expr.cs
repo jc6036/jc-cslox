@@ -23,6 +23,7 @@ namespace my_jlox
         public T opGet(Get get);
         public T opSet(Set set);
         public T opThis(This thisExpr);
+        public T opSuper(Super super);
     }
 
     public abstract class Expr
@@ -215,6 +216,23 @@ namespace my_jlox
         public override T pickForOp<T>(Operate<T> opPicker)
         {
             return opPicker.opThis(this);
+        }
+    }
+
+    public class Super : Expr
+    {
+        public Token keyword;
+        public Token method;
+
+        public Super(Token keyword, Token method)
+        {
+            this.keyword = keyword;
+            this.method = method;
+        }
+
+        public override T pickForOp<T>(Operate<T> opPicker)
+        {
+            return opPicker.opSuper(this);
         }
     }
 }

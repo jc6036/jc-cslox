@@ -127,7 +127,24 @@ namespace my_jlox
 
         public object? exClass(Class stmt)
         {
+            object? superclass = null;
+            if(stmt.superclass != null)
+            {
+                superclass = evaluate(stmt.superclass);
+                if(superclass.GetType() != typeof(LoxClass))
+                {
+                    throw new RuntimeError(stmt.superclass.name, "Superclass must be a class.");
+                }
+            }
+
             environment.define(stmt.name, null);
+
+            if (stmt.superclass != null)
+            {
+                environment = new Environment(environment);
+                Token name = new Token(TokenType.IDENTIFIER, "super", null, 0);
+                environment.define(name, stmt.superclass);
+            }
 
             Dictionary<string, LoxFunction> methods = new Dictionary<string, LoxFunction>();
             foreach(Function method in stmt.methods)
@@ -136,7 +153,17 @@ namespace my_jlox
                 methods.Add(method.name.lexeme, function);
             }
 
-            LoxClass klass = new LoxClass(stmt.name.lexeme, methods);
+            LoxClass? runtimeSuper;
+            if (superclass != null)
+                runtimeSuper = (LoxClass)superclass;
+            else
+                runtimeSuper = null;
+
+            LoxClass klass = new LoxClass(stmt.name.lexeme, runtimeSuper, methods);
+
+            if (superclass != null && environment.enclosing != null)
+                environment = environment.enclosing;
+
             environment.assign(stmt.name, klass);
             return null;
         }
@@ -315,6 +342,25 @@ namespace my_jlox
         public object? opThis(This expr)
         {
             return lookupVariable(expr.keyword, expr);
+        }
+
+        public object? opSuper(Super expr)
+        {
+            int distance = locals[expr];
+
+            // Originally had full null ref checks for this, but got so wordy I decided I didn't care
+            // let em hang in the breeze, and crash our shit if they need to
+            LoxClass superclass = (LoxClass)environment.getAt(distance, "super");
+            LoxInstance obj = (LoxInstance)environment.getAt(distance - 1, "this");
+
+            LoxFunction method = superclass.findMethod(expr.method.lexeme);
+
+            if (method == null)
+            {
+                throw new RuntimeError(expr.method, $"Undefined property '{expr.method.lexeme}'.");
+            }
+
+            return method.bind(obj);
         }
         #endregion
 
