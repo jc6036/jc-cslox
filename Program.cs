@@ -1,3 +1,3 @@
 using my_jlox;
 
-Lox.Main(new [] { "C:/jlox/jc-cslox/Test.cslox" });
+// Lox.Main(new [] { "C:/jlox/jc-cslox/Test.cslox" });
