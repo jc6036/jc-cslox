@@ -225,13 +225,13 @@ namespace my_jlox
 
         private void resolveLocal(Expr expr, Token name)
         {
-            var i = scopes.Count - 1;
-            var reverseScopes = scopes.Reverse<Dictionary<string, bool>>(); // Matching some goofiness in the text
+            var i = scopes.Count;
+            var reverseScopes = scopes.Reverse();                           // Matching some goofiness in the text
             foreach(var scope in reverseScopes)                             // Apparently java allows indexed access to stacks? LOL
             {                                                               // So I had to recreate what the book is doing
                 if(scope.ContainsKey(name.lexeme))
                 {
-                    interpreter.resolve(expr, scopes.Count - 1 - i);
+                    interpreter.resolve(expr, scopes.Count - i);
                 }
                 i--;
             }
@@ -280,7 +280,15 @@ namespace my_jlox
         private void define(Token name)
         {
             if (scopes.Count == 0) return;
-            scopes.Peek().Add(name.lexeme, true);
+
+            if (scopes.Peek().ContainsKey(name.lexeme))
+            {
+                scopes.Peek()[name.lexeme] = true;
+            }
+            else
+            {
+                scopes.Peek().Add(name.lexeme, true);
+            }
         }
 
         private enum FunctionType
